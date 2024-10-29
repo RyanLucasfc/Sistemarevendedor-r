@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pesquisa de Clientes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #b9eeb9;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #6b7280;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        .search-button {
+            background-color: #068f28;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .search-button:hover {
+            background-color: #357c05;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-button {
+            background-color: white;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-button:hover {
+            background-color: #f3f4f6;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-item p {
+            color: #1f2937;
+        }
+
+        .not-found {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        @media (max-width: 640px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema de Pesquisa de Revendedoras</h1>
+            <p>Digite o número do Revendedor para visualizar suas informações</p>
+        </div>
+
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Digite o número do cliente..."
+            >
+            <button class="search-button" onclick="handleSearch()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Pesquisar
+            </button>
+        </div>
+
+        <div id="resultContainer"></div>
+    </div>
+
+    <script>
+        async function handleSearch() {
+            const searchQuery = document.getElementById('searchInput').value;
+            const resultContainer = document.getElementById('resultContainer');
+            
+            if (!searchQuery) {
+                resultContainer.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/cliente/${searchQuery}`);
+                if (!response.ok) {
+                    throw new Error('Cliente não encontrado');
+                }
+                
+                const client = await response.json();
+                
+                resultContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                Informações do Cliente
+                            </div>
+                            <button class="download-button" onclick="handleDownload()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Baixar Relatório
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>ID do Cliente</label>
+                                    <p>${client.id}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Nome</label>
+                                    <p>${client.nome}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Email</label>
+                                    <p>${client.email}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Telefone</label>
+                                    <p>${client.telefone}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Endereço</label>
+                                    <p>${client.endereco}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Cidade/Estado</label>
+                                    <p>${client.cidade} - ${client.estado}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Última Compra</label>
+                                    <p>${client.ultimaCompra}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Valor Total</label>
+                                    <p>${client.valorTotal}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultContainer.innerHTML = `
+                    <div class="card">
+                        <div class="not-found">
+                            Nenhum cliente encontrado com o ID informado.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function handleDownload() {
+            const searchQuery = document.getElementById('searchInput').value;
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/cliente/${searchQuery}`);
+                if (!response.ok) {
+                    throw new Error('Cliente não encontrado');
+                }
+                
+                const client = await response.json();
+                const csvContent = `ID,Nome,Email,Telefone,Endereço,Cidade,Estado,Última Compra,Valor Total\n${
+                    Object.values(client).join(',')
+                }`;
+                
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cliente_${client.id}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Erro ao baixar dados do cliente:', error);
+            }
+        }
+
+        // Permite pesquisar ao pressionar Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+    </script>
+</body>
+</html>
